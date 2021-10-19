@@ -17,3 +17,4 @@ git@github.com:groenewege/vim-less.git
 git@github.com:pangloss/vim-javascript.git
 git@github.com:tpope/vim-fugitive.git
 git@github.com:jiangmiao/auto-pairs.git
+git@github.com:tpope/vim-pathogen.git
