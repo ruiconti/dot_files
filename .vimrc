@@ -41,15 +41,15 @@ set nobackup
 set nowb
 set noswapfile
 
-
 """""""""""""""""""""
 "  Colors and fonts
 """""""""""""""""""""
 
 syntax enable
-set background=dark
+" set background=dark
 set termguicolors
-colorscheme palenight
+" colorscheme palenight
+colorscheme quietlight
 
 set cursorline
 set number
@@ -67,15 +67,18 @@ if $COLORTERM == 'gnome-terminal'
     set t_Co=256
 endif
 
+" Italics for my favorite color scheme
+let g:palenight_terminal_italics=1
+
 " Line cursor
-:hi CursorLine   cterm=NONE ctermbg=black ctermfg=white guibg=#3E4452 
+:hi CursorLine   cterm=NONE ctermbg=black ctermfg=white guibg=#e0e0e0
 
 " Status line
 set statusline=%F%m%r%h%w%=(%{&ff}/%Y)\ (line\ %l\/%L,\ col\ %c)\
 
 if exists("*fugitive#statusline")
-      set statusline+=%{fugitive#statusline()}
-  endif
+    set statusline+=%{fugitive#statusline()}
+endif
 
 """"""""""""
 " Mappings
@@ -159,18 +162,6 @@ try
 catch
 endtry
 
-
-"""""""""""""""""""""""""""
-" *** P Navigation: bufExplorer
-"""""""""""""""""""""""""""
-
-let g:bufExplorerDefaultHelp=0
-let g:bufExplorerShowRelativePath=1
-let g:bufExplorerFindActive=1
-let g:bufExplorerSortBy='name'
-map <leader>o :BufExplorer<cr>
-
-
 """"""""""""""""""""""""""""""
 " *** P Editing: snipMate 
 """"""""""""""""""""""""""""""
@@ -214,9 +205,11 @@ map <leader>nf :NERDTreeFind<cr>
 " *** P Git: GitGutter 
 """"""""""""""""""""""""""""""
 
-let g:gitgutter_enabled=0
-nnoremap <silent> <leader>d :GitGutterToggle<cr>
+let g:gitgutter_enabled = 1
+let g:gitgutter_signs = 1
+nnoremap <silent> <leader>g :GitGutterToggle<cr>
 
+let g:gitgutter_diff_base = 'master'
 
 """"""""""""""""""""""""""""""
 " *** P Editor: Airline 
@@ -224,6 +217,7 @@ nnoremap <silent> <leader>d :GitGutterToggle<cr>
 
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'default'
+let g:airline_theme='base16_material_lighter'
 " let g:airline_theme = "palenight"
 
 
@@ -243,6 +237,26 @@ let g:prettier#autoformat = 1
 """"""""""""""""""""""""""""""
 " *** P Language: CoC 
 """"""""""""""""""""""""""""""
+
+" typescript
+let g:coc_global_extensions = [
+  \ 'coc-tsserver'
+  \ ]
+
+
+" Automatic documentation or diagnostic (if exists) on hover
+function! ShowDocIfNoDiagnostic(timer_id)
+  if (coc#float#has_float() == 0 && CocHasProvider('hover') == 1)
+    silent call CocActionAsync('doHover')
+  endif
+endfunction
+
+function! s:show_hover_doc()
+  call timer_start(1000, 'ShowDocIfNoDiagnostic')
+endfunction
+
+autocmd CursorHoldI * :call <SID>show_hover_doc()
+autocmd CursorHold * :call <SID>show_hover_doc()
 
 " Use TAB to trigger completion 
 inoremap <silent><expr> <TAB>
@@ -276,68 +290,22 @@ nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 
 " GoTo code navigation.
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
+map <silent> gd <Plug>(coc-definition)
+map <silent> gy <Plug>(coc-type-definition)
+map <silent> gi <Plug>(coc-implementation)
+map <silent> gr <Plug>(coc-references)
+map <silent> <leader>g <Plug>(coc-diagnostics)
 
 " Use K to show documentation in preview window.
 nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+map <silent> <leader>r <Plug>(coc-rename)
 
 " Highlight the symbol and its references when holding the cursor.
 autocmd CursorHold * silent call CocActionAsync('highlight')
 
 let airline#extensions#coc#error_symbol = '💥 '
 let airline#extensions#coc#warning_symbol = '⚠️ '
-
-""""""""""""""""""""""""""""""
-" *** P Language: ALE 
-""""""""""""""""""""""""""""""
-
-" Code navigation
-map <leader>d :ALEGoToDefinition<CR>
-map <leader>r :ALEFindReferences<CR>
-map <leader><Tab> :ALEHover<CR>
-
-" Fix files with prettier, and then ESLint.
-let b:ale_fixers = ['prettier', 'eslint']
-" Equivalent to the above.
-let b:ale_linter_aliases = {'jsx': ['javascript', 'css'], 'tsx': ['typescript', 'css']}
-let b:ale_fixers = {'javascript': ['prettier', 'eslint'], 'typescript': ['prettier', 'eslint']}
-let g:ale_completion_enabled = 1
-
-" Define linters
-let g:ale_linters = {
-\   'javascript': ['eslint'],
-\   'python': ['flake8'],
-\   'go': ['go', 'golint', 'errcheck'],
-\   'typescript': ['tsserver', 'typecheck']
-\}
-
-nmap <silent> <leader>a <Plug>(ale_next_wrap)
-
-" Disabling highlighting
-let g:ale_set_highlights = 0
-let g:ale_completion_enabled = 1
-
-" Only run linting when saving the file
-let g:ale_lint_on_text_changed = 'never'
-let g:ale_lint_on_enter = 0
-
-
-""""""""""""""""""""""""""""""
-" *** P Search: Leaderf 
-" Search of files
-""""""""""""""""""""""""""""""
-
-let g:Lf_WindowPosition = 'popup'
-let g:Lf_PreviewInPopup = 0
-" Useful keys
-nmap <leader>ff :Leaderf function<CR>
-nmap <leader>fm :Leaderf mru<CR>
-
-nnoremap <C-q> <C-q>
-
 
 """"""""""""""""""""""""""""""
 " *** P Search: FZF 
