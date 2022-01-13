@@ -107,16 +107,57 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-ds() {
-	echo "Running gulp dev --disable-eager --source-maps --entries 'OWA Mail,App Host'"
-	gulp dev --disable-eager --source-maps --entries 'OWA Mail,App Host'
+NODE_MAX_SIZE=16384
+owds() {
+	echo "Running webpack-dev-server with ${NODE_MAX_SIZE}MB. Options set for gulp:dev=--disable-eager --source-maps --entries 'OWA Mail,App Host' --locale 'en_US'"
+	NODE_OPTIONS="--inspect --max-old-space-size=$NODE_MAX_SIZE" gulp dev --disable-eager --source-maps --entries 'OWA Mail,App Host' --locale 'en_US' 
 }
-hi() {
-	git checkout master
-	git fetch && git pull && better-vsts-npm-auth && yarn fast
+osync() {
+    BRANCH=$(git branch --show-current)
+    git checkout master
+    git fetch && git pull && better-vsts-npm-auth && yarnFast=true yarn && gulp tsconfig
+    git checkout $BRANCH
 }
+odone() {
+	gulp tsconfig && gulp cop:good-fences && gulp build:source
+}
+
+owa() {
+	for i in "$@"; do
+    case $i in
+        dev)
+            task="dev";
+            owds
+            ;;
+        new)
+            task="start";
+            osync && git checkout -b u/rconti/$2
+            ;;
+        'done')
+            task="wrap";
+            odone
+            ;;
+        sync)
+            task="sync";
+            osync
+            ;;
+        *)
+            echo "Unknown command: $1";
+            ;;
+    esac
+	done
+
+  if [[ $task ]]; then
+      echo "✨ Done running owa $task."
+  fi
+}
+
 
 [ -s "$NVM_DIR/nvm.sh"  ] && \. "$NVM_DIR/nvm.sh"
 
-export ds
-export hi
+alias tmux="TERM=xterm-256color tmux"
+
+export owds
+export osync 
+export odone
+export owa
