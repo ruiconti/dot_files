@@ -2,7 +2,6 @@
 .NERDTree*
 .bash*
 .cache*
-.config*
 .git*
 .ngrok*
 .node*
